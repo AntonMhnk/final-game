@@ -23,6 +23,7 @@ body,
 	font-family: "Bebas Neue", sans-serif;
 	font-weight: 400;
 	font-style: normal;
+	z-index: 1500;
 }
 
 /**
@@ -53,9 +54,17 @@ body,
 	color: #ffffff;
 	font-size: 80px;
 	background: #00000033;
-	padding-top: 10px;
-	pointer-events: auto;
+	padding: 10px;
+	pointer-events: auto !important;
 	cursor: pointer;
+	z-index: 2000;
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+	user-select: none;
+}
+
+.restart:active {
+	background: #00000055;
 }
 
 /**
@@ -87,4 +96,118 @@ body,
 
 .controls .key.active {
 	background: #ffffff99;
+}
+
+/* Mobile Controls */
+.mobile-controls {
+	display: none; /* Hidden by default */
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 1000;
+}
+
+.joystick {
+	position: absolute;
+	left: 40px;
+	bottom: 40px;
+	width: 120px;
+	height: 120px;
+	background: rgba(255, 255, 255, 0.2);
+	border: 2px solid rgba(255, 255, 255, 0.4);
+	border-radius: 50%;
+	pointer-events: auto;
+	touch-action: none;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.knob {
+	position: absolute;
+	width: 50px;
+	height: 50px;
+	background: rgba(255, 255, 255, 0.5);
+	border: 2px solid rgba(255, 255, 255, 0.6);
+	border-radius: 50%;
+	pointer-events: none;
+	transition: transform 0.1s ease;
+}
+
+.jump-button {
+	position: fixed;
+	bottom: 50px;
+	right: 50px;
+	width: 80px;
+	height: 80px;
+	background: rgba(255, 255, 255, 0.25);
+	border: 3px solid white;
+	border-radius: 50%;
+	color: white;
+	font-family: "Bebas Neue", sans-serif;
+	font-size: 20px;
+	cursor: pointer;
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+	display: none; /* Hidden by default */
+	align-items: center;
+	justify-content: center;
+	pointer-events: auto;
+}
+
+/* Show mobile controls ONLY on touch devices */
+@media (hover: none) and (pointer: coarse) {
+	.mobile-controls {
+		display: block !important;
+	}
+
+	.jump-button {
+		display: flex !important;
+	}
+
+	/* Hide desktop controls on mobile */
+	.controls {
+		display: none !important;
+	}
+
+	.restart {
+		font-size: 60px; /* Slightly smaller for mobile */
+		padding: 15px; /* Larger touch target */
+		background: #00000066; /* More visible on mobile */
+	}
+}
+
+/* Ensure controls are hidden on desktop */
+@media (hover: hover) {
+	.mobile-controls {
+		display: none !important;
+	}
+
+	.jump-button {
+		display: none !important;
+	}
+}
+
+/* Active states */
+.joystick:active,
+.jump-button:active {
+	background: rgba(255, 255, 255, 0.5);
+}
+
+/* Prevent text selection on mobile */
+.mobile-controls * {
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+/* Prevent text selection */
+.jump-button {
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }

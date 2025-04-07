@@ -2,6 +2,7 @@ import { useKeyboardControls } from "@react-three/drei";
 import useGame from "./stores/useGame";
 import { useRef, useEffect } from "react";
 import { addEffect } from "@react-three/fiber";
+import MobileControls from "./MobileControls";
 
 export default function Interface() {
 	const forward = useKeyboardControls((state) => state.forward);
@@ -16,7 +17,7 @@ export default function Interface() {
 	const time = useRef();
 
 	useEffect(() => {
-		const unsuscribeEffect = addEffect(() => {
+		const unsubscribeEffect = addEffect(() => {
 			const state = useGame.getState();
 			let elapsedTime = 0;
 
@@ -35,9 +36,18 @@ export default function Interface() {
 		});
 
 		return () => {
-			unsuscribeEffect();
+			unsubscribeEffect();
 		};
 	}, []);
+
+	const handleRestart = (e) => {
+		// Prevent any default behavior
+		e.preventDefault();
+		if (e.type === 'touchstart') {
+			e.stopPropagation();
+		}
+		restart();
+	};
 
 	return (
 		<div className="interface">
@@ -48,7 +58,12 @@ export default function Interface() {
 
 			{/* Restart */}
 			{phase === "ended" && (
-				<div className="restart" onClick={restart}>
+				<div 
+					className="restart" 
+					onClick={handleRestart}
+					onTouchStart={handleRestart}
+					style={{ pointerEvents: 'auto' }}
+				>
 					Restart
 				</div>
 			)}
@@ -67,6 +82,9 @@ export default function Interface() {
 					<div className={`key large ${jump ? "active" : ""}`}></div>
 				</div>
 			</div>
+
+			{/* Mobile Controls */}
+			<MobileControls />
 		</div>
 	);
 }

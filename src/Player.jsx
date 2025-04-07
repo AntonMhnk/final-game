@@ -6,7 +6,7 @@ import * as THREE from "three";
 import useGame from "./stores/useGame";
 
 export function Player() {
-	const [subscibeKeys, getKeys] = useKeyboardControls();
+	const [subscribeKeys, getKeys] = useKeyboardControls();
 	const body = useRef();
 	const { rapier, world } = useRapier();
 	const rapierWorld = world;
@@ -19,34 +19,78 @@ export function Player() {
 	const restart = useGame((state) => state.restart);
 	const blocksCount = useGame((state) => state.blocksCount);
 
+	/**
+	 * Jump
+	 */
+	const jump = () => {
+		const origin = body.current.translation();
+		origin.y -= 0.31;
+		const direction = { x: 0, y: -1, z: 0 };
+		const ray = new rapier.Ray(origin, direction);
+		const hit = rapierWorld.castRay(ray, 10, true);
+
+		if (hit.timeOfImpact < 0.15) {
+			body.current.applyImpulse({ x: 0, y: 0.1, z: 0 });
+		}
+	};
+
+	useEffect(() => {
+		const unsubscribeJump = subscribeKeys(
+			(state) => state.jump,
+			(value) => {
+				if (value) jump();
+			}
+		);
+
+		return () => {
+			unsubscribeJump();
+		};
+	}, []);
+
 	useFrame((state, delta) => {
 		/**
-		 * Conrols
+		 * Controls
 		 */
-		const { forward, backward, leftward, rightward } = getKeys();
+		const keyboardControls = getKeys();
+		const mobileControls = window.mobileControls || {};
+
+		// Combine keyboard and mobile controls
+		const controls = {
+			forward: keyboardControls.forward || mobileControls.forward,
+			backward: keyboardControls.backward || mobileControls.backward,
+			leftward: keyboardControls.leftward || mobileControls.leftward,
+			rightward: keyboardControls.rightward || mobileControls.rightward,
+			jump: keyboardControls.jump || mobileControls.jump,
+		};
+
+		if (controls.jump) {
+			jump();
+		}
 
 		const impulse = { x: 0, y: 0, z: 0 };
 		const torque = { x: 0, y: 0, z: 0 };
 
-		// Strenght impuslse and torque
-		const impulseStrenght = 0.5 * delta;
-		const torqueStrenght = 0.15 * delta;
+		const impulseStrength = 0.3 * delta;
+		const torqueStrength = 0.1 * delta;
 
-		if (forward) {
-			impulse.z -= impulseStrenght;
-			torque.x -= torqueStrenght;
+		if (controls.forward) {
+			impulse.z -= impulseStrength;
+			torque.x -= torqueStrength;
 		}
-		if (backward) {
-			impulse.z += impulseStrenght;
-			torque.x += torqueStrenght;
+
+		if (controls.backward) {
+			impulse.z += impulseStrength;
+			torque.x += torqueStrength;
 		}
-		if (leftward) {
-			impulse.x -= impulseStrenght;
-			torque.z += torqueStrenght;
+
+		if (controls.leftward) {
+			impulse.x -= impulseStrength;
+			torque.z += torqueStrength;
 		}
-		if (rightward) {
-			impulse.x += impulseStrenght;
-			torque.z -= torqueStrenght;
+
+		if (controls.rightward) {
+			impulse.x += impulseStrength;
+			torque.z -= torqueStrength;
 		}
 
 		body.current.applyImpulse(impulse);
@@ -84,21 +128,6 @@ export function Player() {
 	});
 
 	/**
-	 * Jump
-	 */
-	const jump = () => {
-		const origin = body.current.translation();
-		origin.y -= 0.31;
-		const direction = { x: 0, y: -1, z: 0 };
-		const ray = new rapier.Ray(origin, direction);
-		const hit = rapierWorld.castRay(ray, 10, true);
-
-		if (hit.timeOfImpact < 0.15) {
-			body.current.applyImpulse({ x: 0, y: 0.5, z: 0 });
-		}
-	};
-
-	/**
 	 * Reset
 	 */
 	const reset = () => {
@@ -117,22 +146,20 @@ export function Player() {
 			}
 		);
 
-		const unsubsctibeJump = subscibeKeys(
+		const unsubscribeJump = subscribeKeys(
 			(state) => state.jump,
 			(value) => {
-				if (value) {
-					jump();
-				}
+				if (value) jump();
 			}
 		);
 
 		// phases change
-		const unsubscribeAny = subscibeKeys(() => {
+		const unsubscribeAny = subscribeKeys(() => {
 			start();
 		});
 
 		return () => {
-			unsubsctibeJump();
+			unsubscribeJump();
 			unsubscribeAny();
 			unsubscribeReset();
 		};
