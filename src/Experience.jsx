@@ -10,16 +10,17 @@ export default function Experience() {
 	const blocksCount = useGame((state) => state.blocksCount);
 	const blocksSeed = useGame((state) => state.blocksSeed);
 
+	// FullScreen App
 	useEffect(() => {
 		async function initTg() {
 			if (await isTMA()) {
-				init();
+				// Initialize Telegram Mini App
+				await viewport.mount();
 
-				if (viewport.mount.isAvailable()) {
-					await viewport.mount();
-					viewport.expand();
-				}
+				// Expand viewport to full height
+				await viewport.expand();
 
+				// Request fullscreen mode
 				if (viewport.requestFullscreen.isAvailable()) {
 					await viewport.requestFullscreen();
 				}
