@@ -9,27 +9,36 @@ export default function Experience() {
 	const blocksCount = useGame((state) => state.blocksCount);
 	const blocksSeed = useGame((state) => state.blocksSeed);
 
-	// FullScreen App
 	useEffect(() => {
-		// Initialize Telegram WebApp
-		if (window.Telegram && window.Telegram.WebApp) {
+		// Initialize Telegram WebApp safely
+		if (window.Telegram?.WebApp) {
 			const webapp = window.Telegram.WebApp;
 			
-			// Expand to full height
-			webapp.expand();
+			// Only call methods that are available in version 6.0
+			if (webapp.expand) {
+				webapp.expand();
+			}
 			
-			// Enable closing confirmation
-			webapp.enableClosingConfirmation();
-			
-			// Set viewport settings
-			webapp.setViewportHeight();
-			
-			// Set background color
-			webapp.setBackgroundColor('#bdedfc');
-			
-			// Ready event
-			webapp.ready();
+			if (webapp.ready) {
+				webapp.ready();
+			}
 		}
+
+		// Handle viewport height for mobile
+		const updateHeight = () => {
+			const vh = window.innerHeight * 0.01;
+			document.documentElement.style.setProperty('--vh', `${vh}px`);
+		};
+
+		updateHeight();
+		window.addEventListener('resize', updateHeight);
+		window.addEventListener('orientationchange', updateHeight);
+
+		// Cleanup
+		return () => {
+			window.removeEventListener('resize', updateHeight);
+			window.removeEventListener('orientationchange', updateHeight);
+		};
 	}, []);
 
 	return (
