@@ -4,6 +4,12 @@ import { Level } from "./Level.jsx";
 import { Player } from "./Player.jsx";
 import useGame from "./stores/useGame.jsx";
 import { useEffect } from "react";
+import {
+	requestFullscreen,
+	isFullscreen,
+	viewport,
+	isTMA,
+} from "@telegram-apps/sdk";
 
 export default function Experience() {
 	const blocksCount = useGame((state) => state.blocksCount);
