@@ -3,7 +3,6 @@ import Lights from "./Lights.jsx";
 import { Level } from "./Level.jsx";
 import { Player } from "./Player.jsx";
 import useGame from "./stores/useGame.jsx";
-import { viewport, isTMA } from "@telegram-apps/sdk-react";
 import { useEffect } from "react";
 
 export default function Experience() {
@@ -12,21 +11,25 @@ export default function Experience() {
 
 	// FullScreen App
 	useEffect(() => {
-		async function initTg() {
-			if (await isTMA()) {
-				// Initialize Telegram Mini App
-				await viewport.mount();
-
-				// Expand viewport to full height
-				await viewport.expand();
-
-				// Request fullscreen mode
-				if (viewport.requestFullscreen.isAvailable()) {
-					await viewport.requestFullscreen();
-				}
-			}
+		// Initialize Telegram WebApp
+		if (window.Telegram && window.Telegram.WebApp) {
+			const webapp = window.Telegram.WebApp;
+			
+			// Expand to full height
+			webapp.expand();
+			
+			// Enable closing confirmation
+			webapp.enableClosingConfirmation();
+			
+			// Set viewport settings
+			webapp.setViewportHeight();
+			
+			// Set background color
+			webapp.setBackgroundColor('#bdedfc');
+			
+			// Ready event
+			webapp.ready();
 		}
-		initTg();
 	}, []);
 
 	return (
